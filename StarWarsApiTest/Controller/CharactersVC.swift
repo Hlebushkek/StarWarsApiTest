@@ -61,23 +61,32 @@ class CharactersVC: UIViewController {
 
 extension CharactersVC: UISearchBarDelegate {
     func setupSearchBar() {
+        searchBar.delegate = self
         searchBar.searchTextField.textColor = .white
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        f
+        filteredCharacters.removeAll()
+        
+        characters.forEach({
+            if $0.name.lowercased().contains(searchText.lowercased()) || searchText.count == 0 {
+                filteredCharacters.append($0)
+            }
+        })
+        
+        tableView.reloadData()
     }
 }
 
 extension CharactersVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return characters.count
+        return filteredCharacters.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "characterCell") as? CharacterCell else { return UITableViewCell() }
         
-        cell.updateCharacter(name: characters[indexPath.row].name)
+        cell.updateCharacter(name: filteredCharacters[indexPath.row].name)
         return cell
     }
     
@@ -85,7 +94,7 @@ extension CharactersVC: UITableViewDelegate, UITableViewDataSource {
         guard let detailedVC = storyboard?.instantiateViewController(withIdentifier: "detailedCharacterVC") as? DetailedCharacterVC else { return }
         
         presentDetail(detailedVC)
-        detailedVC.setupCharacter(character: characters[indexPath.row])
+        detailedVC.setupCharacter(character: filteredCharacters[indexPath.row])
     }
 }
 
